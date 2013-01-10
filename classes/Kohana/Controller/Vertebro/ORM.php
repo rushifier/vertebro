@@ -53,6 +53,64 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 	 */
 	protected $form_data;
 
+
+	/**
+	 * Find the belongs_to relationship between to models
+	 *
+	 * @param   ORM    Child Model
+	 * @param   ORM    Parent Model
+	 * @return  array
+	 */
+	protected function _parent_relation($child, $parent)
+	{
+		foreach ($child->belongs_to() as $belongs)
+		{
+			if (strtolower(Arr::get($belongs, 'model')) === strtolower($parent->object_name()))
+			{
+				return $belongs;
+			}
+		}
+		return FALSE;
+	}
+
+	/**
+	 * Add a relation to our query
+	 *
+	 * @param  ORM     Child model
+	 * @param  string  Name of the parent model
+	 * @param  int     Primary key id of the parent model
+	 * @return ORM
+	 */
+	protected function _add_relation($child_model, $parent_string)
+	{
+		list($parent_name, $parent_id) = explode('/', $parent_string);
+
+		// Check the model exists
+		if ( ! class_exists('Model_'.Inflector::singular($parent_name)))
+			throw new HTTP_Exception_404('Unable to map model');
+
+		// Load the related model
+		$parent_model = ORM::factory(Inflector::singular($parent_name), $parent_id);
+
+		// Lookup the belongs_to relation
+		if ( ! $belongs_to = $this->_parent_relation($child_model, $parent_model))
+			throw new HTTP_Exception_404('Unable to map model');
+
+		// Check if the child model is the current model
+		$child_table_name = ($this->_model->object_name() === $child_model->object_name())
+			? $child_model->object_name()
+			: $child_model->table_name();
+
+		// Join the relationship to our model
+		$this->_model = $this->_model
+			->join($parent_model->table_name())
+			->on($parent_model->table_name().'.'.$parent_model->primary_key(), '=', $child_table_name.'.'.Arr::get($belongs_to, 'foreign_key'))
+			->where($parent_model->table_name().'.'.$parent_model->primary_key(), '=', $parent_id);
+
+		// Return the joined model
+		return $parent_model;
+	}
+
 	public function before()
 	{
 		parent::before();
@@ -73,71 +131,17 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 		// Load conditions
 		if ($relation_str = $this->request->param('relations'))
 		{
+			// Split
 			preg_match_all('/([a-zA-Z\-]+\/[0-9]+)/', $relation_str, $relations, PREG_SET_ORDER);
+			$relations = Arr::pluck(array_reverse($relations), 0);
 
-			$relations = array_reverse($relations);
+			// Setup the first child object
+			$child_model = $this->_model;
 
-			// Loop through condition sets, check $_belongs_to relationships and add to our model
+			// Loop through relations and add them to our model query
 			foreach ($relations as $relation)
 			{
-				$condition = explode('/', Arr::get($relation, 0));
-
-				$relation_name      = ucfirst(Arr::get($condition, 0));
-				$relation_singular  = Inflector::singular($relation_name);
-				$relation_id        = Arr::get($condition, 1);
-
-				$join_model       = ORM::factory(Inflector::singular(Arr::get($condition, 0)));
-				$join_model_id    = Arr::get($condition, 1);
-				$join_model_table = $join_model->table_name();
-				$join_model_pk    = $join_model->primary_key();
-
-				if ( ! isset($previous_model))
-				{
-					$belongs_to = FALSE;
-					foreach ($this->_model->belongs_to() as $belongs)
-					{
-						if (strtolower(Arr::get($belongs, 'model')) === strtolower($relation_singular))
-						{
-							$belongs_to = $belongs;
-							break;
-						}
-					}
-
-					if ( ! $belongs_to)
-						throw new HTTP_Exception_404;
-
-					$join_model_fk = Arr::get($belongs_to, 'foreign_key');
-
-					$this->_model = $this->_model
-						->join($join_model_table)
-						->on($join_model_table.'.'.$join_model_pk, '=', $this->_model_name.'.'.$join_model_fk)
-						->where($join_model_table.'.'.$join_model_pk, '=', $join_model_id);
-				}
-				else
-				{
-					$belongs_to = FALSE;
-					foreach ($previous_model->belongs_to() as $belongs)
-					{
-						if (strtolower(Arr::get($belongs, 'model')) === strtolower($relation_singular))
-						{
-							$belongs_to = $belongs;
-							break;
-						}
-					}
-
-					if ( ! $belongs_to)
-						throw new HTTP_Exception_404;
-
-					$join_model_fk = Arr::get($belongs_to, 'foreign_key');
-
-					$this->_model = $this->_model
-						->join($join_model_table)
-						->on($join_model_table.'.'.$join_model_pk, '=', $previous_model->table_name().'.'.$join_model_fk)
-						->where($join_model_table.'.'.$join_model_pk, '=', $join_model_id);
-				}
-
-				$previous_model = $join_model;
-				$join_model->clear();
+				$child_model = $this->_add_relation($child_model, $relation);
 			}
 		}
 
