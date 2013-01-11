@@ -34,6 +34,10 @@ class Kohana_Controller_Vertebro extends Controller {
 		// Execute parent's before method
 		parent::before();
 
+		// Check method Support
+		if ( ! isset($this->_method_map[$this->request->method()]))
+			throw HTTP_Exception::factory(405)->allowed($this->_method_map);
+
 		// Generate the action name based on the HTTP Method of the request, and a supplied action
 		$action_name = ($this->request->action() === 'index')
 			? Arr::get($this->_method_map, $this->request->method())
