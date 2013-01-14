@@ -9,7 +9,7 @@
  */
 Route::set('vertebro-orm', '(<relations>)<model>(/<model_id>)(/<action>).json',
 	array(
-		'relations' => '([a-zA-Z]+/[0-9]+/)+',
+		'relations' => '([a-zA-Z]+/[0-9]+/)+!',
 		'model_id'  => '[0-9]+',
 	))
 	->filter(function($route, $params, $request)
