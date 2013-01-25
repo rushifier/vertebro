@@ -1,4 +1,8 @@
 <?php defined('SYSPATH') or die('No direct script access.');
+
+Response::$messages[422] = 'Unprocessible Entity';
+
+
 /**
  * Automatic Routing for ORM Objects
  *
@@ -7,7 +11,7 @@
  *
  * eg. /users/1/foos/4/bars.json
  */
-Route::set('vertebro-orm', '(<relations>)<model>(/<model_id>)(/<action>).json',
+/*Route::set('vertebro-orm', '(<relations>)<model>(/<model_id>)(/<action>).json',
 	array(
 		'relations' => '([a-zA-Z]+/[0-9]+/)+',
 		'model_id'  => '[0-9]+',
@@ -33,15 +37,16 @@ Route::set('vertebro-orm', '(<relations>)<model>(/<model_id>)(/<action>).json',
 		'directory' => 'JSON',
 		'action'    => 'index',
 	));
-
+*/
 /**
  * Default Vertebro Route
  *
  * This route handles any custom Backbone resources
  * you want to define.
  */
-Route::set('vertebro-default', '<controller>(/<action>).json')
+/*Route::set('vertebro-default', '<controller>(/<action>).json')
 	->defaults(array(
 		'directory' => 'Vertebro',
 		'action'    => 'index',
 	));
+*/

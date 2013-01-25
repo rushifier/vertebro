@@ -302,7 +302,7 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 				return $belongs;
 			}
 		}
-		return FALSE;
+		return $child->has($parent->object_name());
 	}
 
 	/**

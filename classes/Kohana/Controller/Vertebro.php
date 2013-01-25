@@ -43,6 +43,8 @@ class Kohana_Controller_Vertebro extends Controller {
 			? Arr::get($this->_method_map, $this->request->method())
 			: Arr::get($this->_method_map, $this->request->method()).'_'.$this->request->action();
 
+		$this->body = new StdClass;
+
 		// Execute the correct CRUD action based on the requested method
 		$this->request->action($action_name);
 	}
