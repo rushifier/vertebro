@@ -317,6 +317,8 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 	{
 		list($parent_name, $parent_id) = explode('/', $parent_string);
 
+		$parent_name = ucfirst(strtolower($parent_name));
+
 		// Check the model exists
 		if ( ! class_exists('Model_'.Inflector::singular($parent_name)))
 			throw new HTTP_Exception_404('Unable to map model');
