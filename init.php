@@ -7,7 +7,7 @@
  *
  * eg. /users/1/foos/4/bars.json
  */
-Route::set('vertebro-orm', '(<relations>)<model>(/<model_id>)(/<action>).json',
+/*Route::set('vertebro-orm', '(<relations>)<model>(/<model_id>)(/<action>).json',
 	array(
 		'relations' => '([a-zA-Z]+/[0-9]+/)+!',
 		'model_id'  => '[0-9]+',
@@ -32,7 +32,7 @@ Route::set('vertebro-orm', '(<relations>)<model>(/<model_id>)(/<action>).json',
 	->defaults(array(
 		'directory' => 'JSON',
 		'action'    => 'index',
-	));
+	));*/
 
 /**
  * Default Vertebro Route
@@ -40,8 +40,8 @@ Route::set('vertebro-orm', '(<relations>)<model>(/<model_id>)(/<action>).json',
  * This route handles any custom Backbone resources
  * you want to define.
  */
-Route::set('vertebro-default', '<controller>(/<action>).json')
+/*Route::set('vertebro-default', '<controller>(/<action>).json')
 	->defaults(array(
 		'directory' => 'Vertebro',
 		'action'    => 'index',
-	));
+	));*/
