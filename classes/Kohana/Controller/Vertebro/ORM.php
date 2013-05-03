@@ -81,7 +81,7 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 		}
 		catch (ErrorException $e)
 		{
-			throw new HTTP_Exception_404;
+			throw HTTP_Exception::factory(404);
 		}
 
 		// Load conditions
@@ -105,8 +105,8 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 		if ($this->_model_id = $this->request->param('model_id'))
 		{
 			// Throw error for POST on a single object
-			if (Request::POST === $this->request->method())
-				throw HTTP_Exception::factory(405)->allowed(array());
+			/*if (Request::POST === $this->request->method() AND ! $this->request->param('action'))
+				throw HTTP_Exception::factory(405)->allowed(array());*/
 
 			$this->_model = $this->_model
 				->where($this->_model_name.'.id', '=', $this->_model_id);
@@ -140,9 +140,7 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 		$this->body = new StdClass;
 	}
 
-	/**
-	 * Handle GET requests
-	 */
+	// Handle GET requests
 	public function action_get()
 	{
 		// Return single object
@@ -166,9 +164,7 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 		return $this->body = $data;
 	}
 
-	/**
-	 * Handle POST requests
-	 */
+	// Handle POST requests
 	public function action_post()
 	{
 		// Check that data was sent
@@ -191,16 +187,14 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 		}
 	}
 
-	/**
-	 * Handle PUT requests
-	 */
+	// Handle PUT requests
 	public function action_put()
 	{
 		// Check that data was sent
 		if ( ! $this->_form_data)
 			return $this->body = array('error' => 'No data provided');
 
-		$this->_model->values($values);
+		$this->_model->values($this->_form_data);
 
 		try
 		{
@@ -213,9 +207,7 @@ class Kohana_Controller_Vertebro_ORM extends Controller_Vertebro {
 		}
 	}
 
-	/**
-	 * Handle DELETE requests
-	 */
+	// Handle DELETE requests
 	public function action_delete()
 	{
 		if ( ! $this->_model_id)
